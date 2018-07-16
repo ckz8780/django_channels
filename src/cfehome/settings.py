@@ -69,7 +69,8 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'cfehome.wsgi.application'
+# WSGI_APPLICATION = 'cfehome.wsgi.application'
+ASGI_APPLICATION = 'cfehome.routing.application'
 
 
 # Database
