@@ -1,4 +1,4 @@
-# Rapid-X Django Channels
+# Django Channels Async Websocket Chat
 
 This little repo demonstrates the use of Django Channels and real time websockets to build an async chat application. 
 
