@@ -21,20 +21,42 @@
 
 <script>
 // Websocket scripts
-let loc = window.location
-let wsProto = 'ws://'
+var loc = window.location
+var wsProto = 'ws://'
+var formData = $('#form');
+var msgInput = $('#id_message');
 
 if(loc.protocol == 'https:') {
-	let wsProto = 'wss://'
+	var wsProto = 'wss://'
 }
 
-let endpoint = wsProto + loc.host + loc.pathname;
-let socket = new WebSocket(endpoint);
+var endpoint = wsProto + loc.host + loc.pathname;
+var socket = new WebSocket(endpoint);
 
-socket.onmessage = e => (console.log("message", e));
-socket.onopen = e => (console.log("open", e));
-socket.onerror = e => (console.log("error", e));
-socket.onclose = e => (console.log("close", e));
+socket.onmessage = function(e) {
+	console.log("message", e);
+}
+
+socket.onopen = function(e) {
+	console.log('open', e);
+	formData.submit(function(event){
+		event.preventDefault()
+		var msgText = msgInput.val()
+		var data = {
+			'message': msgText
+		}
+		socket.send(JSON.stringify(data))
+		formData[0].reset()
+	});
+}
+
+socket.onerror = function(e) {
+	console.log("error", e);
+}
+
+socket.onclose = function(e) {
+	console.log("close", e);
+}
 
 </script>
 {% endblock %}
