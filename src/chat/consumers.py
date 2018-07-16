@@ -26,11 +26,17 @@ class ChatConsumer(AsyncConsumer):
             loaded_dict_data = json.loads(front_text)
             msg = loaded_dict_data.get('message')
             print(msg)
+            user = self.scope['user']
 
-        await self.send({
-            'type': 'websocket.send',
-            'text': msg
-        })
+            my_response = {
+                'message': msg,
+                'username': user.username if user.is_authenticated else 'Anonymous'
+            }
+
+            await self.send({
+                'type': 'websocket.send',
+                'text': json.dumps(my_response)
+            })
 
     async def websocket_disconnect(self, event):
         # When the socket disconnects
