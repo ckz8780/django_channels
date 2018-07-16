@@ -10,13 +10,18 @@ class ChatConsumer(AsyncConsumer):
     async def websocket_connect(self, event):
         # When the socket connects
         print('Connected', event)
-        await self.send({
-            'type': 'websocket.accept'
-        })
-
         other_user = self.scope['url_route']['kwargs']['username']
         me = self.scope['user']
         thread_obj = await self.get_thread(me, other_user)
+        print(me, other_user, thread_obj.id)
+        chat_room = f'thread_{thread_obj.id}'
+        self.chat_room = chat_room
+
+        await self.channel_layer.group_add(chat_room, self.channel_name)
+
+        await self.send({
+            'type': 'websocket.accept'
+        })
 
     async def websocket_receive(self, event):
         # When a message is received from the websocket
@@ -33,10 +38,23 @@ class ChatConsumer(AsyncConsumer):
                 'username': user.username if user.is_authenticated else 'Anonymous'
             }
 
-            await self.send({
-                'type': 'websocket.send',
-                'text': json.dumps(my_response)
-            })
+            # Broadcast the message event to be sent out
+            await self.channel_layer.group_send(
+                self.chat_room,
+                {
+                    'type': 'chat_message',
+                    'text': json.dumps(my_response)
+                }
+            )
+
+    async def chat_message(self, event):
+        print('message', event)
+
+        # Send the message out to the chat room participants
+        await self.send({
+            'type': 'websocket.send',
+            'text': event['text']
+        })
 
     async def websocket_disconnect(self, event):
         # When the socket disconnects

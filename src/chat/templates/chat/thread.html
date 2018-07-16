@@ -19,7 +19,7 @@
 {% endblock %}
 
 {% block script %}
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reconnecting-websocket/1.0.0/reconnecting-websocket.min.js"></script>
 <script>
 // Websocket scripts
 var loc = window.location
@@ -34,7 +34,7 @@ if(loc.protocol == 'https:') {
 }
 
 var endpoint = wsProto + loc.host + loc.pathname;
-var socket = new WebSocket(endpoint);
+var socket = new ReconnectingWebSocket(endpoint);
 
 socket.onmessage = function(e) {
 	console.log("message", e);
@@ -47,7 +47,6 @@ socket.onopen = function(e) {
 	formData.submit(function(event){
 		event.preventDefault()
 		var msgText = msgInput.val()
-		chatHolder.append('<li>' + msgText + ' (' + me + ')</li>')
 		var data = {
 			'message': msgText
 		}
