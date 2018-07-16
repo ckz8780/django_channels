@@ -20,7 +20,21 @@
 {% block script %}
 
 <script>
-// websocket scripts
+// Websocket scripts
+let loc = window.location
+let wsProto = 'ws://'
+
+if(loc.protocol == 'https:') {
+	let wsProto = 'wss://'
+}
+
+let endpoint = wsProto + loc.host + loc.pathname;
+let socket = new WebSocket(endpoint);
+
+socket.onmessage = e => (console.log("message", e));
+socket.onopen = e => (console.log("open", e));
+socket.onerror = e => (console.log("error", e));
+socket.onclose = e => (console.log("close", e));
 
 </script>
 {% endblock %}
