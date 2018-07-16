@@ -13,9 +13,9 @@ class ChatConsumer(AsyncConsumer):
         other_user = self.scope['url_route']['kwargs']['username']
         me = self.scope['user']
         thread_obj = await self.get_thread(me, other_user)
-        print(me, other_user, thread_obj.id)
         chat_room = f'thread_{thread_obj.id}'
         self.chat_room = chat_room
+        self.thread_obj = thread_obj
 
         await self.channel_layer.group_add(chat_room, self.channel_name)
 
@@ -30,13 +30,14 @@ class ChatConsumer(AsyncConsumer):
         if front_text is not None:
             loaded_dict_data = json.loads(front_text)
             msg = loaded_dict_data.get('message')
-            print(msg)
             user = self.scope['user']
 
             my_response = {
                 'message': msg,
                 'username': user.username if user.is_authenticated else 'Anonymous'
             }
+
+            await self.create_chat_message(msg)
 
             # Broadcast the message event to be sent out
             await self.channel_layer.group_send(
@@ -63,3 +64,9 @@ class ChatConsumer(AsyncConsumer):
     @database_sync_to_async
     def get_thread(self, user, other_username):
         return Thread.objects.get_or_new(user, other_username)[0]
+
+    @database_sync_to_async
+    def create_chat_message(self, message):
+        thread_obj = self.thread_obj
+        me = self.scope['user']
+        return ChatMessage.objects.create(thread=thread_obj, user=me, message=message)
